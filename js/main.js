@@ -17,36 +17,160 @@ window.onload = function() {
     
     function preload() {
         // Load an image and call it 'logo'.
-        game.load.image( 'logo', 'assets/phaser.png' );
+        game.load.spritesheet( 'player', 'assets/player.png',25,35);
+        game.load.image('goal', 'assets/transcript.png');
+        game.load.image('background','assets/sky.png');
+        game.load.image('platforms','assets/platform.png');
+        game.load.image('platform','assets/smallplatform.png');
+        game.load.image('startplatform','assets/mediumplatform.png');
+        game.load.spritesheet('fake','assets/fake.png',32,32);
+        game.load.image('spikes','assets/spikes.png');
+        game.load.image('winner','assets/Winner.png');
+        game.load.image('failone','assets/Failone.png');
+        game.load.image('failtwo','assets/Failtwo.png');
+        game.load.audio('music','assets/ac_theme_8bit.mp3');
     }
     
-    var bouncy;
+    var player;
+    var platforms;
+    var cursors;
+    var transcript;
+    var background;
+    var jump;
+    var fake;
+    var goal;
+    var spikes;
+    var music;
     
-    function create() {
-        // Create a sprite at the center of the screen using the 'logo' image.
-        bouncy = game.add.sprite( game.world.centerX, game.world.centerY, 'logo' );
-        // Anchor the sprite at its center, as opposed to its top-left corner.
-        // so it will be truly centered.
-        bouncy.anchor.setTo( 0.5, 0.5 );
+    
+    function create() 
+    {
+    	
+    	background = game.add.sprite(0,0,'background');
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        platforms = game.add.group();
+        music = game.add.audio('music');
+        music.play();
+     	platforms.enableBody = true;
+     	var ledge = platforms.create(0,game.world.height - 32,'startplatform');
+     	ledge.body.immovable = true;
+     	var small = platforms.create(100,500,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(200,450,'platform');
+     	small.body.immovable = true;
+     	fake = game.add.group();
+     	fake.enableBody = true;
+     	var faker = fake.create(300,450,'fake');
+     	faker.body.immovable = true;
+     	var small = platforms.create(400,450,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(500,450,'platform');
+     	small.body.immovable = true;
+     	var faker = fake.create(600,450,'fake');
+     	faker.body.immovable = true;
+     	var small = platforms.create(700,450,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(650,420,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(750,360,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(650,300,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(550,250,'platform');
+     	small.body.immovable = true;
+     	var faker = fake.create(450,250,'fake');
+     	faker.body.immovable = true;
+     	var small = platforms.create(350,250,'platform');
+     	small.body.immovable = true;
+     	var faker = fake.create(250,250,'fake');
+     	faker.body.immovable = true;
+     	var small = platforms.create(150,250,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(100,250,'platform');
+     	small.body.immovable = true;
+     	var faker = fake.create(50,250,'fake');
+     	faker.body.immovable = true;
+     	var small = platforms.create(0,160,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(100,100,'platform');
+     	small.body.immovable = true;
+     	var small = platforms.create(132,100,'platform');
+     	small.body.immovable = true;
+     	
+     	goal = game.add.sprite(122,90,'goal');
+        goal.anchor.setTo( 0.5, 0.5 );
+     	game.physics.enable( goal, Phaser.Physics.ARCADE );
+     	
+     	spikes = game.add.sprite(50,game.world.height - 32,'spikes');
+     	game.physics.enable( spikes, Phaser.Physics.ARCADE );   	
+     	
+     	
+     	
+     	player = game.add.sprite(32, game.world.height - 150, 'player' );
+     	player.anchor.setTo( 0.5, 0.5 );
+     	game.physics.enable( player, Phaser.Physics.ARCADE );
+     	player.body.collideWorldBounds = true;
+     	player.body.gravity.y = 400;
+     	player.animations.add('jump',[2,3],1,true);
+     	
+     	cursors = game.input.keyboard.createCursorKeys();
+     	jump = game.input.keyboard.addKey(Phaser.Keyboard.F);
+      
+    }
+    
+    function update() 
+    {
+     game.physics.arcade.overlap(player, fake, death, null, this);
+     game.physics.arcade.overlap(player, goal, win, null, this);
+     game.physics.arcade.overlap(player, spikes, fall, null, this);
+	 game.physics.arcade.collide(player,platforms);
+	 player.body.velocity.x = 0;
+	 player.frame = 4;
+	 
+	  if (cursors.left.isDown)
+    {
+        //  Move to the left
+        player.frame = 1;
+        player.body.velocity.x = -150;
         
-        // Turn on the arcade physics engine for this sprite.
-        game.physics.enable( bouncy, Phaser.Physics.ARCADE );
-        // Make it bounce off of the world bounds.
-        bouncy.body.collideWorldBounds = true;
+ 	}
+    else if (cursors.right.isDown)
+    {
+        //  Move to the right
+        player.frame = 0;
+        player.body.velocity.x = 150;
         
-        // Add some text using a CSS style.
-        // Center it in X, and position its top 15 pixels from the top of the world.
-        var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        var text = game.add.text( game.world.centerX, 15, "Build something awesome.", style );
-        text.anchor.setTo( 0.5, 0.0 );
-    }
+	}
+	else if (jump.isDown && player.body.touching.down)
+	{
+		player.body.velocity.y = -270;
+		player.animations.play('jump');
+	}
+	//end of update
+   	 }
+   function death()
+   {
+   player.kill();
+   game.add.sprite(0,0,'failone');
+   music.stop();
+   game.paused = true;
+   }
+   function fall()
+   {
+   player.kill();
+   game.add.sprite(0,0,'failtwo');
+   music.stop();
+   game.paused = true;
+   }
+   function win()
+   {
+    player.kill();
+    game.add.sprite(0,0,'winner');
+    music.stop();
+    goal.kill();
+    game.paused = true;
     
-    function update() {
-        // Accelerate the 'logo' sprite towards the cursor,
-        // accelerating at 500 pixels/second and moving no faster than 500 pixels/second
-        // in X or Y.
-        // This function returns the rotation angle that makes it visually match its
-        // new trajectory.
-        bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, this.game.input.activePointer, 500, 500, 500 );
-    }
+   }
+   	
+   	
 };
