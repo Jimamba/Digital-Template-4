@@ -24,7 +24,7 @@ window.onload = function() {
         game.load.image('platform','assets/smallplatform.png');
         game.load.image('startplatform','assets/mediumplatform.png');
         game.load.spritesheet('fake','assets/fake.png',32,32);
-        game.load.image('spikes','assets/spikes.png');
+        game.load.image('spikes','assets/Spikes.png');
         game.load.image('winner','assets/Winner.png');
         game.load.image('failone','assets/Failone.png');
         game.load.image('failtwo','assets/Failtwo.png');
